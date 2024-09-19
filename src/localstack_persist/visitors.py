@@ -90,7 +90,6 @@ class LoadStateVisitor(StateVisitor):
                     copy_function=shutil.copy,
                 )
             os.makedirs(state_container.path, exist_ok=True)
-            start_watcher(self.service_name, str(state_container.path))
 
         else:
             LOG.warning("Unexpected state_container type: %s", type(state_container))
@@ -199,7 +198,6 @@ class SaveStateVisitor(StateVisitor):
                 self._sync_directories(state_container.path, dir_path)
             else:
                 os.makedirs(state_container.path, exist_ok=True)
-            start_watcher(self.service_name, str(state_container.path))
         else:
             LOG.warning("Unexpected state_container type: %s", type(state_container))
 
@@ -262,21 +260,3 @@ class AffectedServiceHandler(FileSystemEventHandler):
 
 path_watchers: Dict[str, AffectedServiceHandler] = {}
 observer: Optional[BaseObserver] = None
-
-
-def start_watcher(service_name: str, path: str):
-    if path in path_watchers:
-        return
-
-    global observer
-    old_observer = observer
-    observer = Observer()
-
-    path_watchers[path] = AffectedServiceHandler(service_name)
-
-    for watcher_path, watcher in path_watchers.items():
-        observer.schedule(watcher, watcher_path, True)
-
-    observer.start()
-    if old_observer:
-        old_observer.stop()

@@ -45,7 +45,6 @@ class StateTracker:
         serve_custom_service_request_handlers.append(self.on_request)
         run_custom_response_handlers.append(self.on_response)
         run_custom_finalizers.append(self.on_finalize)
-        Thread(target=self._run).start()
 
     def stop(self):
         assert self.is_running
